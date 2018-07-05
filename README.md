@@ -9,7 +9,7 @@ TODO: Delete this and the text above, and describe your gem
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi_object_mapper'
+gem 'jsonapi-object-mapper'
 ```
 
 And then execute:
@@ -18,11 +18,46 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install jsonapi_object_mapper
+    $ gem install jsonapi-object-mapper
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require "jsonapi_object_mapper"
+
+class Photo < JsonAPIObjectMapper::Deserializer::Resource
+  attribute :image
+end
+
+class User < JsonAPIObjectMapper::Deserializer::Resource
+  # Embedding with another Resource class, will deserialize the `included` resource with the given class
+  has_one :photo, embed_with: Photo
+  
+  # By default the value will be assigned whatever in located in the `included` selection. 
+ # Other wise basic relationship resources will be added.
+  has_one :friend
+  
+  # This will accept the default value
+  attribute :last_name
+  
+  # You can transform the setting value
+  attribute :first_name do |attr_value|
+    attr_value.upcase
+  end
+  
+  # You can mass assign attributes using the `attributes` method instead if blocks don't matter
+ 
+  attributes :ssn, :passport, :more_person_info
+end
+  
+
+User.call_collection(json_payload) #=> [<#User:123>, <#User:432>]
+user = User.call(json_payload) #=> <#User:123>
+
+user.first_name #=> "Foo"
+user.last_name  #=> "Bar"
+
+```
 
 ## Development
 
