@@ -54,7 +54,7 @@ end
 User.call_collection(json_payload) #=> [<#User:123>, <#User:432>]
 user = User.call(json_payload) #=> <#User:123>
 
-user.first_name #=> "Foo"
+user.first_name #=> "FOOER"
 user.last_name  #=> "Bar"
 
 ```
