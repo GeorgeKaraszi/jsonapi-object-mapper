@@ -3,6 +3,9 @@
 require "bundler/setup"
 require "jsonapi_object_mapper"
 
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require File.expand_path(f) }
+Dir["#{File.dirname(__FILE__)}/**/*examples.rb"].each { |f| require f }
+
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
