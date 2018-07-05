@@ -9,7 +9,7 @@ module JsonAPIObjectMapper
       extend DSL
 
       class << self
-        attr_accessor :rel_blocks, :rel_options, :attr_blocks
+        attr_accessor :rel_blocks, :rel_options, :attr_blocks, :id_block, :type_block
       end
       instance_variable_set("@attr_blocks", {})
       instance_variable_set("@rel_blocks", {})
@@ -20,6 +20,8 @@ module JsonAPIObjectMapper
         klass.instance_variable_set("@attr_blocks", attr_blocks.dup)
         klass.instance_variable_set("@rel_blocks", rel_blocks.dup)
         klass.instance_variable_set("@rel_options", rel_options.dup)
+        klass.instance_variable_set("@id_block", id_block)
+        klass.instance_variable_set("@type_block", type_block)
       end
 
       def self.call_collection(document)
@@ -41,6 +43,8 @@ module JsonAPIObjectMapper
       def initialize(payload = nil, included = nil)
         super()
         data           = payload || {}
+        @id            = data["id"]
+        @type          = data["type"]
         @attributes    = data["attributes"] || {}
         @relationships = data["relationships"] || {}
         @includes      = IncludedResources.load(included)
@@ -52,8 +56,14 @@ module JsonAPIObjectMapper
       private
 
       def deserialize!
+        deserialize_id_type!
         deserialize_attributes!
         deserialize_relationships!
+      end
+
+      def deserialize_id_type!
+        assign_attribute("id", self.class.id_block&.call(@id))
+        assign_attribute("type", self.class.type_block&.call(@id))
       end
 
       def deserialize_attributes!

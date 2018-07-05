@@ -16,10 +16,12 @@ module JsonAPIObjectMapper
 
       def id(&block)
         self.id_block = block || DEFAULT_ID_BLOCK
+        define_method(:id) { fetch_attribute(:id) }
       end
 
       def type(&block)
         self.type_block = block || DEFAULT_TYPE_BLOCK
+        define_method(:type) { fetch_attribute(:type) }
       end
 
       def attribute(attribute_name, &block)
