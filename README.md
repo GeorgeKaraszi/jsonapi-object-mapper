@@ -33,8 +33,9 @@ class User < JsonAPIObjectMapper::Deserializer::Resource
   # Embedding with another Resource class, will deserialize the `included` resource with the given class
   has_one :photo, embed_with: Photo
   
-  # By default the value will be assigned whatever in located in the `included` selection. 
- # Other wise basic relationship resources will be added.
+  # By default the value will be assigned whatever is located in the `included` selection. 
+ # Otherwise basic relationship resource information will be added.
+ #    - IE: { "type" = "friend", "id" = "10" }
   has_one :friend
   
   # This will accept the default value
