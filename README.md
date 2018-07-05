@@ -46,8 +46,7 @@ class User < JsonAPIObjectMapper::Deserializer::Resource
     attr_value.upcase
   end
   
-  # You can mass assign attributes using the `attributes` method instead if blocks don't matter
- 
+  # You can mass-assign attributes using the `attributes` method instead if blocks don't matter
   attributes :ssn, :passport, :more_person_info
 end
   
