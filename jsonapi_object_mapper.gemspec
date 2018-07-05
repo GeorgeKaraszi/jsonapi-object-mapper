@@ -4,8 +4,8 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "lib"))
 require "jsonapi_object_mapper/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "jsonapi_object_mapper"
-  spec.version       = JSONAPIObjectMapper::VERSION
+  spec.name          = "jsonapi-object-mapper"
+  spec.version       = JsonAPIObjectMapper::VERSION
   spec.authors       = ["George Protacio-Karaszi"]
   spec.email         = ["georgekaraszi@gmail.com"]
 

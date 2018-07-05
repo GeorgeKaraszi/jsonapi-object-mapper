@@ -3,7 +3,7 @@
 require "jsonapi_object_mapper/deserializer/dsl"
 require "jsonapi_object_mapper/deserializer/included_resources"
 
-module JSONAPIObjectMapper
+module JsonAPIObjectMapper
   module Deserializer
     class Resource
       extend DSL

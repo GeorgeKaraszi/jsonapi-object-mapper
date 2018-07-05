@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe JsonapiObjectMapper do
+RSpec.describe JsonAPIObjectMapper do
   it "has a version number" do
-    expect(JsonapiObjectMapper::VERSION).not_to be nil
+    expect(JsonAPIObjectMapper::VERSION).not_to be nil
   end
 end

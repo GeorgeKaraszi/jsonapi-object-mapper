@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module JSONAPIObjectMapper
+module JsonAPIObjectMapper
   module Deserializer
     class IncludedResources
       extend Forwardable

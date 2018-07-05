@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-module JSONAPIObjectMapper
+module JsonAPIObjectMapper
   module Deserializer
     RSpec.describe Resource do
       describe "Attributes" do

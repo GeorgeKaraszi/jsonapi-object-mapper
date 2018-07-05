@@ -2,7 +2,7 @@
 
 require "jsonapi_object_mapper/deserializer/included_resources"
 
-module JSONAPIObjectMapper
+module JsonAPIObjectMapper
   module Deserializer
     module DSL
       DEFAULT_ID_BLOCK      = proc { |id| id }
