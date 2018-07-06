@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 require "jsonapi-object-mapper/deserializer/dsl"
-require "jsonapi-object-mapper/deserializer/included_resources"
+require "jsonapi-object-mapper/deserializer/collection"
+require "jsonapi-object-mapper/parser/errors"
 
 module JsonAPIObjectMapper
   module Deserializer
     class Resource
+      include JsonAPIObjectMapper::Parser::Errors
       extend DSL
 
       class << self
@@ -24,36 +26,47 @@ module JsonAPIObjectMapper
         klass.instance_variable_set("@type_block", type_block)
       end
 
-      def self.call_collection(document)
-        parsed_document = document.is_a?(Hash) ? document : ::Oj.load(document)
-        parsed_includes = IncludedResources.load(parsed_document["included"])
-        Array(parsed_document["data"]).map { |doc| new(doc, parsed_includes) }
-      end
-
-      def self.call(document, parsed_includes = nil)
-        parsed_document = document.is_a?(Hash) ? document : ::Oj.load(document)
-        parsed_includes ||= IncludedResources.load(parsed_document["included"])
-        new(parsed_document["data"], parsed_includes)
+      def self.call(document)
+        parser = JsonAPIObjectMapper::Parser::Document.new(document)
+        if parser.document["data"].is_a?(Array) || parser.invalid?
+          Collection.new(parser, klass: self)
+        else
+          new(parser)
+        end
       end
 
       def self.embed!(attributes)
-        new("attributes" => attributes)
+        parser = JsonAPIObjectMapper::Parser::Document.new("attributes" => attributes)
+        new(parser)
       end
 
-      def initialize(payload = nil, included = nil)
+      def initialize(parser, document: nil)
         super()
-        data           = payload || {}
-        @id            = data["id"]
-        @type          = data["type"]
-        @attributes    = data["attributes"] || {}
-        @relationships = data["relationships"] || {}
-        @includes      = IncludedResources.load(included)
-        deserialize!
+        raise ArgumentError, "Must provide a parsed document" unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
+        @errors = parser.errors
+
+        if document_valid?
+          @includes      = parser.includes
+          @data          = document_data(parser, document)
+          @id            = @data["id"]
+          @type          = @data["type"]
+          @attributes    = @data.fetch("attributes", {})
+          @relationships = @data.fetch("relationships", {})
+          deserialize!
+        end
 
         freeze
       end
 
+      def each
+        yield self
+      end
+
       private
+
+      def document_data(parser, document)
+        document.nil? ? (parser.document["data"] || parser.document) : (document["data"] || document)
+      end
 
       def deserialize!
         deserialize_id_type!
@@ -62,8 +75,8 @@ module JsonAPIObjectMapper
       end
 
       def deserialize_id_type!
-        assign_attribute("id", self.class.id_block&.call(@id))
-        assign_attribute("type", self.class.type_block&.call(@id))
+        assign_attribute("id", self.class.id_block.call(@id))       if self.class.id_block
+        assign_attribute("type", self.class.type_block.call(@type)) if self.class.type_block
       end
 
       def deserialize_attributes!
@@ -83,7 +96,7 @@ module JsonAPIObjectMapper
 
       def initialize_relationship(rel_type, rel_value)
         return unless include_relationship?(rel_type)
-        assign_relationship(rel_type, @includes.fetch(rel_value["data"]))
+        assign_relationship(rel_type, rel_value["data"])
       end
     end
   end

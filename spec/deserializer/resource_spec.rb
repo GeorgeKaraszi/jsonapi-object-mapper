@@ -21,7 +21,7 @@ module JsonAPIObjectMapper
             attribute :baz
           end
 
-          actual = klass.new(payload)
+          actual = klass.call(payload)
           expect(actual.foo).to eq("bar")
           expect(actual.baz).to eq("nas")
         end
@@ -34,7 +34,7 @@ module JsonAPIObjectMapper
             end
           end
 
-          actual = klass.new(payload)
+          actual = klass.call(payload)
           expect(actual.baz).to eq("THIS IS THE REAL DEAL!")
         end
       end
@@ -55,13 +55,15 @@ module JsonAPIObjectMapper
 
         context "Has included Resource" do
           let(:included_payload) do
-            [
-              {
-                "id" => "1",
-                "type" => "photo",
-                "attributes" => { "image" => "good_day_sir.jpg" },
-              },
-            ]
+            payload.merge(
+              "included" => [
+                {
+                  "id" => "1",
+                  "type" => "photo",
+                  "attributes" => { "image" => "good_day_sir.jpg" },
+                },
+              ],
+            )
           end
 
           it "Should embed the included resource into the relationship" do
@@ -69,7 +71,7 @@ module JsonAPIObjectMapper
               has_one :photo
             end
 
-            actual = klass.new(payload, included_payload)
+            actual = klass.call(included_payload)
             expect(actual.photo).to eq("image" => "good_day_sir.jpg")
           end
 
@@ -82,7 +84,7 @@ module JsonAPIObjectMapper
               has_one :photo, embed_with: photo_klass
             end
 
-            actual = core_klass.new(payload, included_payload)
+            actual = core_klass.call(included_payload)
             expect(actual.photo).to be_a(photo_klass)
             expect(actual.photo.image).to eq("good_day_sir.jpg")
           end
@@ -94,11 +96,11 @@ module JsonAPIObjectMapper
               has_one :photo
             end
 
-            actual = klass.new(payload)
+            actual = klass.call(payload)
             expect(actual.photo).to eq("id" => "1", "type" => "photo")
           end
 
-          it "Should set the attribute to nil when no included resource is present" do
+          it "Should set the default relationship values if no includes can be found" do
             photo_klass = Class.new(described_class) do
               attribute :image
             end
@@ -107,9 +109,9 @@ module JsonAPIObjectMapper
               has_one :photo, embed_with: photo_klass
             end
 
-            actual = core_klass.new(payload)
-            expect(actual.photo).to be_a(photo_klass)
-            expect(actual.photo.image).to be_nil
+            actual = core_klass.call(payload)
+            expect(actual.photo).to be_a(Hash)
+            expect(actual.photo).to eq("id" => "1", "type" => "photo")
           end
         end
       end

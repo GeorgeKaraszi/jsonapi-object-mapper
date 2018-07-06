@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "jsonapi-object-mapper/deserializer/included_resources"
-
 module JsonAPIObjectMapper
   module Deserializer
     module DSL
@@ -43,13 +41,16 @@ module JsonAPIObjectMapper
 
       module ClassMethods
         def initialize(*args)
-          super
           @_class_attributes    = {}
           @_class_relationships = {}
+          super
         end
 
         def to_hash
-          [@_class_attributes, @_class_relationships].reduce(:merge)
+          hashed_relationships = @_class_relationships.map do |key, value|
+            { key => value.respond_to?(:to_hash) ? value.to_hash : value }
+          end
+          [@_class_attributes, *hashed_relationships].reduce({}, :merge)
         end
         alias to_h to_hash
 
@@ -73,13 +74,15 @@ module JsonAPIObjectMapper
         end
 
         def assign_relationship(key, value)
-          block           = self.class.rel_blocks[key.to_s] || DEFAULT_ATTR_BLOCK
-          rel_embed_class = self.class.rel_options[key.to_s]
+          block             = self.class.rel_blocks[key.to_s] || DEFAULT_ATTR_BLOCK
+          rel_embed_class   = self.class.rel_options[key.to_s]
+          rel_value         = @includes.fetch(value)
+
           @_class_relationships[key.to_s] =
-            if rel_embed_class.respond_to?(:embed!)
-              block.call(rel_embed_class.embed!(value))
+            if rel_value != value && rel_embed_class.respond_to?(:embed!)
+              block.call(rel_embed_class.embed!(rel_value))
             else
-              block.call(value)
+              block.call(rel_value)
             end
         end
 

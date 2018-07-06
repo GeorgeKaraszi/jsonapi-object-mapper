@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JsonAPIObjectMapper
-  module Deserializer
+  module Parser
     class IncludedResources
       extend Forwardable
 
@@ -15,14 +15,15 @@ module JsonAPIObjectMapper
 
       def initialize(included_resources = [])
         included_resources ||= []
-
         @resource = included_resources.each_with_object({}) do |include, hash|
           hash[format_key(include)] = include["attributes"]
         end
+
+        freeze
       end
 
-      def fetch(relationship)
-        @resource.fetch(format_key(relationship), relationship)
+      def fetch(relationship, fallback = nil)
+        @resource.fetch(format_key(relationship), fallback || relationship)
       end
 
       def included?(relationship)
