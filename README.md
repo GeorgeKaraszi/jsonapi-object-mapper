@@ -23,7 +23,7 @@ Or install it yourself as:
 ## Usage
 
 ```ruby
-require "jsonapi_object_mapper"
+require "jsonapi-object-mapper"
 
 class Photo < JsonAPIObjectMapper::Deserializer::Resource
   attribute :image
@@ -51,11 +51,31 @@ class User < JsonAPIObjectMapper::Deserializer::Resource
 end
   
 
-User.call_collection(json_payload) #=> [<#User:123>, <#User:432>]
 user = User.call(json_payload) #=> <#User:123>
 
 user.first_name #=> "FOOER"
 user.last_name  #=> "Bar"
+
+# If json API Payload is a collection of data points
+users = User.call(json_payload) #=> <# JsonAPIObjectMapper::Deserializer::Collection #>
+
+users.each do |user|
+  user.first_name
+  user.last_name
+end
+
+```
+
+### Errors
+
+```ruby
+
+user = User.call(json_payload)
+
+# Aliases: document_valid?
+# Inverses: errors?, invalid?, document_invalid? 
+user.valid?  #=> false
+user.errors  #=> [<# OpenStruct title:..., detail: ..., source: {...}, ...>, ...]
 
 ```
 
