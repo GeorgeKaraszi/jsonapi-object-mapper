@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "jsonapi_object_mapper/deserializer/dsl"
-require "jsonapi_object_mapper/deserializer/included_resources"
+require "jsonapi-object-mapper/deserializer/dsl"
+require "jsonapi-object-mapper/deserializer/included_resources"
 
 module JsonAPIObjectMapper
   module Deserializer

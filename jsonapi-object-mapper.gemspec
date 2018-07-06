@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "lib"))
-require "jsonapi_object_mapper/version"
+require "jsonapi-object-mapper/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "jsonapi-object-mapper"
