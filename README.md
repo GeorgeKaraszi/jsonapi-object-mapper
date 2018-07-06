@@ -1,8 +1,6 @@
 # JsonapiObjectMapper
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jsonapi_object_mapper`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Deserialize's raw or pre-hashed JsonAPI objects into plan ruby objects as well as embeds any included relational resources.
 
 ## Installation
 
