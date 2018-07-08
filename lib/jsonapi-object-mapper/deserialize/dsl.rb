@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JsonAPIObjectMapper
-  module Deserializer
+  module Deserialize
     module DSL
       DEFAULT_ID_BLOCK      = proc { |id| id }
       DEFAULT_TYPE_BLOCK    = proc { |type| type }

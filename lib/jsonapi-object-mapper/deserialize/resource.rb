@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "jsonapi-object-mapper/deserializer/dsl"
-require "jsonapi-object-mapper/deserializer/collection"
+require "jsonapi-object-mapper/deserialize/dsl"
+require "jsonapi-object-mapper/deserialize/collection"
 require "jsonapi-object-mapper/parser/errors"
 
 module JsonAPIObjectMapper
-  module Deserializer
+  module Deserialize
     class Resource
       include JsonAPIObjectMapper::Parser::Errors
       extend DSL
@@ -42,7 +42,7 @@ module JsonAPIObjectMapper
 
       def initialize(parser, document: nil)
         super()
-        raise ArgumentError, "Must provide a parsed document" unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
+        raise InvalidParser, "Must provide a parsed document" unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
         @errors = parser.errors
 
         if document_valid?

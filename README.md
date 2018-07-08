@@ -23,11 +23,11 @@ Or install it yourself as:
 ```ruby
 require "jsonapi-object-mapper"
 
-class Photo < JsonAPIObjectMapper::Deserializer::Resource
+class Photo < JsonAPIObjectMapper::Deserialize::Resource
   attribute :image
 end
 
-class User < JsonAPIObjectMapper::Deserializer::Resource
+class User < JsonAPIObjectMapper::Deserialize::Resource
   # Embedding with another Resource class, will deserialize the `included` resource with the given class
   has_one :photo, embed_with: Photo
   
@@ -55,7 +55,7 @@ user.first_name #=> "FOOER"
 user.last_name  #=> "Bar"
 
 # If json API Payload is a collection of data points
-users = User.call(json_payload) #=> <# JsonAPIObjectMapper::Deserializer::Collection #>
+users = User.call(json_payload) #=> <# JsonAPIObjectMapper::Deserialize::Collection #>
 
 users.each do |user|
   user.first_name

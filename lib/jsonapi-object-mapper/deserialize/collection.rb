@@ -3,7 +3,7 @@
 require "jsonapi-object-mapper/parser/errors"
 
 module JsonAPIObjectMapper
-  module Deserializer
+  module Deserialize
     class Collection
       include Enumerable
       include JsonAPIObjectMapper::Parser::Errors
@@ -11,8 +11,8 @@ module JsonAPIObjectMapper
       attr_accessor :collection_data
 
       def initialize(parser, klass:)
-        raise ArgumentError, "Must provide a valid resource klass" unless klass.is_a?(Class)
-        raise ArgumentError, "Must provide a parsed document" unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
+        raise InvalidResource, "Must provide a valid resource klass" unless klass.is_a?(Class)
+        raise InvalidParser, "Must provide a parsed document" unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
         @errors            = parser.errors
         @collection_data   =
           if document_invalid?

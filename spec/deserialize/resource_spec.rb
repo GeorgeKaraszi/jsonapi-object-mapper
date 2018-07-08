@@ -3,7 +3,7 @@
 require "spec_helper"
 
 module JsonAPIObjectMapper
-  module Deserializer
+  module Deserialize
     RSpec.describe Resource do
       describe "Attributes" do
         let(:payload) do
