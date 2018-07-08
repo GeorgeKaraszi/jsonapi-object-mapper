@@ -3,27 +3,24 @@
 module JsonAPIObjectMapper
   module Deserialize
     module DSL
-      DEFAULT_ID_BLOCK      = proc { |id| id }
-      DEFAULT_TYPE_BLOCK    = proc { |type| type }
-      DEFAULT_ATTR_BLOCK    = proc { |value| value }
-      DEFAULT_HAS_ONE_BLOCK = proc { |value| value }
+      DEFAULT_BLOCK = proc { |value| value }
 
       def self.extended(klass)
         klass.include ClassMethods
       end
 
       def id(&block)
-        self.id_block = block || DEFAULT_ID_BLOCK
+        self.id_block = block || DEFAULT_BLOCK
         define_method(:id) { fetch_attribute(:id) }
       end
 
       def type(&block)
-        self.type_block = block || DEFAULT_TYPE_BLOCK
+        self.type_block = block || DEFAULT_BLOCK
         define_method(:type) { fetch_attribute(:type) }
       end
 
       def attribute(attribute_name, &block)
-        attr_blocks[attribute_name.to_s] = block || DEFAULT_ATTR_BLOCK
+        attr_blocks[attribute_name.to_s] = block || DEFAULT_BLOCK
         define_method(attribute_name.to_sym) { fetch_attribute(attribute_name) }
       end
 
@@ -32,7 +29,7 @@ module JsonAPIObjectMapper
       end
 
       def has_one(relationship_name, embed_with: nil, &block) # rubocop:disable Naming/PredicateName
-        rel_blocks[relationship_name.to_s]  = block || DEFAULT_HAS_ONE_BLOCK
+        rel_blocks[relationship_name.to_s]  = block || DEFAULT_BLOCK
         rel_options[relationship_name.to_s] = embed_with unless embed_with.nil?
         define_method(relationship_name.to_sym) { fetch_relationship(relationship_name) }
       end
@@ -69,12 +66,12 @@ module JsonAPIObjectMapper
         end
 
         def assign_attribute(key, value)
-          block = self.class.attr_blocks[key.to_s] || DEFAULT_ATTR_BLOCK
+          block = self.class.attr_blocks[key.to_s] || DEFAULT_BLOCK
           @_class_attributes[key.to_s] = block.call(value)
         end
 
         def assign_relationship(key, value)
-          block             = self.class.rel_blocks[key.to_s] || DEFAULT_ATTR_BLOCK
+          block             = self.class.rel_blocks[key.to_s] || DEFAULT_BLOCK
           rel_embed_class   = self.class.rel_options[key.to_s]
           rel_value         = @includes.fetch(value)
 
