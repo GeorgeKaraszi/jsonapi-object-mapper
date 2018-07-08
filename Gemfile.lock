@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jsonapi-object-mapper (0.6.0)
+    jsonapi-object-mapper (0.6.5)
       oj (~> 3.0)
 
 GEM
