@@ -26,6 +26,10 @@ module JsonAPIObjectMapper
         freeze
       end
 
+      def to_hash
+        @collection_data.map(&:to_hash)
+      end
+
       def [](index)
         @collection_data[index]
       end
