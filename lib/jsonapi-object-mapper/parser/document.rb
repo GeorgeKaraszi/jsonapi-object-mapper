@@ -11,7 +11,7 @@ module JsonAPIObjectMapper
       attr_accessor :document, :includes
 
       def initialize(document)
-        @document = document.is_a?(Hash) ? document : ::Oj.load(document)
+        @document = (document.is_a?(String) ? ::Oj.load(document) : document).freeze
         @includes = IncludedResources.load(@document["included"])
         @errors   = deserialize_errors!.freeze
         freeze
