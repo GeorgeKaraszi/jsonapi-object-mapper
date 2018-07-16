@@ -72,8 +72,7 @@ module JsonAPIObjectMapper
       def deserialize!
         deserialize_id_type!
         deserialize_attributes!
-        deserialize_has_one_relationships!
-        deserialize_has_many_relationships!
+        deserialize_relationships!
       end
 
       def deserialize_id_type!
@@ -90,29 +89,22 @@ module JsonAPIObjectMapper
         @attributes.each_pair(&method(:new_attribute))
       end
 
-      def deserialize_has_one_relationships!
+      def deserialize_relationships!
         return if @relationships.empty?
-        @relationships.each_pair(&method(:new_has_one_relationship))
-      end
-
-      def deserialize_has_many_relationships!
-        return if @relationships.empty?
-        @relationships.each_pair(&method(:new_has_many_relationship))
+        @relationships.each_pair(&method(:new_relationship))
       end
 
       def new_attribute(attr_name, attr_value)
-        return unless include_attribute?(attr_name)
+        return unless attribute_defined?(attr_name)
         assign_attribute(attr_name, attr_value)
       end
 
-      def new_has_one_relationship(rel_type, rel_value)
-        return unless include_has_one_relationship?(rel_type)
-        assign_has_one_relationship(rel_type, rel_value["data"])
-      end
-
-      def new_has_many_relationship(rel_type, rel_value)
-        return unless include_has_many_relationship?(rel_type)
-        assign_has_many_relationship(rel_type, rel_value["data"])
+      def new_relationship(rel_type, rel_value)
+        if has_one_defined?(rel_type)
+          assign_has_one_relationship(rel_type, rel_value["data"])
+        elsif has_many_defined?(rel_type)
+          assign_has_many_relationship(rel_type, rel_value["data"])
+        end
       end
     end
   end

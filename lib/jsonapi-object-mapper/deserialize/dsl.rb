@@ -29,14 +29,14 @@ module JsonAPIObjectMapper
         attributes_names.each(&method(:attribute))
       end
 
-      def has_one(relationship_name, **options, &block) # rubocop:disable Naming/PredicateName
+      def has_one(relationship_name, **options, &block)
         rel_options_process!(relationship_name, options)
         rel_has_one_blocks[relationship_name.to_s] = block || DEFAULT_BLOCK
         define_method(relationship_name.to_sym) { fetch_relationship(relationship_name) }
       end
       alias belongs_to has_one
 
-      def has_many(relationship_name, **options, &block) # rubocop:disable Naming/PredicateName
+      def has_many(relationship_name, **options, &block)
         rel_options_process!(relationship_name, options)
         rel_has_many_blocks[relationship_name.to_s] = block || HAS_MANY_BLOCK
         define_method(relationship_name.to_sym) { fetch_relationship(relationship_name) }
@@ -112,15 +112,15 @@ module JsonAPIObjectMapper
           @_class_relationships[key] = block.call(embed!(rel_embed_class, rel_values))
         end
 
-        def include_attribute?(attribute_name)
+        def attribute_defined?(attribute_name)
           self.class.attr_blocks.key?(attribute_name)
         end
 
-        def include_has_one_relationship?(rel_name)
+        def has_one_defined?(rel_name)
           self.class.rel_has_one_blocks.key?(rel_name)
         end
 
-        def include_has_many_relationship?(rel_name)
+        def has_many_defined?(rel_name)
           self.class.rel_has_many_blocks.key?(rel_name)
         end
 
