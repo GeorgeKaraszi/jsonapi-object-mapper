@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/jsonapi-object-mapper.svg)](https://badge.fury.io/rb/jsonapi-object-mapper) [![Build Status](https://travis-ci.com/GeorgeKaraszi/jsonapi-object-mapper.svg?branch=master)](https://travis-ci.com/GeorgeKaraszi/jsonapi-object-mapper) [![Maintainability](https://api.codeclimate.com/v1/badges/6eef293ed23cf92a4c1a/maintainability)](https://codeclimate.com/github/GeorgeKaraszi/jsonapi-object-mapper/maintainability)
+
 # JsonapiObjectMapper
 
 Deserialize's raw or pre-hashed JsonAPI objects into plan ruby objects as well as embeds any included relational resources.
