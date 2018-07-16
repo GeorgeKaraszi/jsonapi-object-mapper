@@ -59,6 +59,9 @@ Style/ClassAndModuleChildren:
 Style/Documentation:
   Enabled: false
 
+Naming/PredicateName:
+  Enabled: false
+
 Style/Lambda:
   Enabled: false
 
