@@ -3,7 +3,7 @@
 require "spec_helper"
 
 module JsonAPIObjectMapper
-  module Deserialize
+  module Deserialize # rubocop:disable Metrics/ModuleLength
     RSpec.describe Resource do
       describe "Attributes" do
         let(:payload) do
@@ -39,7 +39,7 @@ module JsonAPIObjectMapper
         end
       end
 
-      describe "Relationships" do
+      describe ".has_one Relationship" do
         let(:payload) do
           {
             "relationships" => {
@@ -53,7 +53,7 @@ module JsonAPIObjectMapper
           }
         end
 
-        context "Has included Resource" do
+        context "Has one included Resource" do
           let(:included_payload) do
             payload.merge(
               "included" => [
@@ -72,7 +72,7 @@ module JsonAPIObjectMapper
             end
 
             actual = klass.call(included_payload)
-            expect(actual.photo).to eq("image" => "good_day_sir.jpg")
+            expect(actual.photo).to include("attributes" => { "image" => "good_day_sir.jpg" })
           end
 
           it "Should Resolve and decode the resource as the embedded relationship class" do
@@ -100,7 +100,7 @@ module JsonAPIObjectMapper
             expect(actual.photo).to eq("id" => "1", "type" => "photo")
           end
 
-          it "Should set the default relationship values if no includes can be found" do
+          it "Should assign attributes that exist from the included resource" do
             photo_klass = Class.new(described_class) do
               attribute :image
             end
@@ -109,9 +109,85 @@ module JsonAPIObjectMapper
               has_one :photo, embed_with: photo_klass
             end
 
-            actual = core_klass.call(payload)
-            expect(actual.photo).to be_a(Hash)
-            expect(actual.photo).to eq("id" => "1", "type" => "photo")
+            actual = core_klass.load(payload)
+            expect(actual.photo).to be_a(photo_klass)
+            expect(actual.photo.id).to eq("1")
+            expect(actual.photo.type).to eq("photo")
+            expect(actual.photo.image).to be_nil
+          end
+        end
+      end
+
+      describe ".has_many Relationships" do
+        let(:payload) do
+          {
+            "relationships" => {
+              "photos" => {
+                "data" => [
+                  { "type" => "photo", "id" => "1" },
+                  { "type" => "photo", "id" => "99" },
+                ],
+              },
+            },
+          }
+        end
+
+        context "Has many included resources" do
+          let(:included_payload) do
+            payload.merge(
+              "included" => [
+                {
+                  "id" => "1",
+                  "type" => "photo",
+                  "attributes" => { "image" => "good_day_sir.jpg" },
+                },
+                {
+                  "id" => "99",
+                  "type" => "photo",
+                  "attributes" => { "image" => "i_said_good_day!.jpg" },
+                },
+              ],
+            )
+          end
+
+          it "Should store a collection of included values" do
+            klass = Class.new(described_class) do
+              has_many :photos
+            end
+
+            actual = klass.load(included_payload)
+            expect(actual.photos).to be_a(Array)
+            expect(actual.photos.first["id"]).to eq("1")
+            expect(actual.photos.first["type"]).to eq("photo")
+
+            expect(actual.photos.last["id"]).to eq("99")
+            expect(actual.photos.last["type"]).to eq("photo")
+          end
+
+          it "Should resolve the embed_with option to a collection of parsed results" do
+            photo_klass = Class.new(described_class)
+            klass       = Class.new(described_class) do
+              has_many :photos, embed_with: photo_klass
+            end
+
+            actual = klass.load(included_payload)
+            expect(actual.photos).to be_a(Collection)
+            expect(actual.photos[0].id).to eq("1")
+            expect(actual.photos[1].id).to eq("99")
+          end
+        end
+
+        context "Has no included resources" do
+          it "Should set the hash of the unresolved type" do
+            klass = Class.new(described_class) do
+              has_many :photos
+            end
+
+            actual = klass.load(payload)
+            expect(actual.photos).to be_a(Array)
+            expect(actual.photos.first).to be_a(Hash)
+            expect(actual.photos.first["id"]).to eq("1")
+            expect(actual.photos.last["id"]).to eq("99")
           end
         end
       end

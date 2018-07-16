@@ -16,8 +16,8 @@ module JsonAPIObjectMapper
       def initialize(included_resources = [])
         included_resources ||= []
         @resource = included_resources.each_with_object({}) do |include, hash|
-          hash[format_key(include)] = include["attributes"]
-        end
+          hash[format_key(include)] = include
+        end.freeze
 
         freeze
       end

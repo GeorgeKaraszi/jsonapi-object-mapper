@@ -11,8 +11,8 @@ module JsonAPIObjectMapper
       attr_accessor :collection_data
 
       def initialize(parser, klass:)
-        raise InvalidResource, "Must provide a valid resource klass" unless klass.is_a?(Class)
-        raise InvalidParser, "Must provide a parsed document" unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
+        raise InvalidResource unless klass.is_a?(Class)
+        raise InvalidParser   unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
         @errors            = parser.errors
         @collection_data   =
           if document_invalid?
@@ -24,6 +24,10 @@ module JsonAPIObjectMapper
           end.freeze
 
         freeze
+      end
+
+      def [](index)
+        @collection_data[index]
       end
 
       def each

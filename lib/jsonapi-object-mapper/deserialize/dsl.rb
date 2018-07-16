@@ -3,7 +3,8 @@
 module JsonAPIObjectMapper
   module Deserialize
     module DSL
-      DEFAULT_BLOCK = proc { |value| value }
+      DEFAULT_BLOCK  = proc { |value| value }
+      HAS_MANY_BLOCK = proc { |values| values.is_a?(Collection) ? values : Array(values) }
 
       def self.extended(klass)
         klass.include ClassMethods
@@ -28,13 +29,38 @@ module JsonAPIObjectMapper
         attributes_names.each(&method(:attribute))
       end
 
-      def has_one(relationship_name, embed_with: nil, &block) # rubocop:disable Naming/PredicateName
-        rel_blocks[relationship_name.to_s]  = block || DEFAULT_BLOCK
-        rel_options[relationship_name.to_s] = embed_with unless embed_with.nil?
+      def has_one(relationship_name, **options, &block) # rubocop:disable Naming/PredicateName
+        rel_options_process!(relationship_name, options)
+        rel_has_one_blocks[relationship_name.to_s] = block || DEFAULT_BLOCK
         define_method(relationship_name.to_sym) { fetch_relationship(relationship_name) }
       end
-      alias has_many has_one
       alias belongs_to has_one
+
+      def has_many(relationship_name, **options, &block) # rubocop:disable Naming/PredicateName
+        rel_options_process!(relationship_name, options)
+        rel_has_many_blocks[relationship_name.to_s] = block || HAS_MANY_BLOCK
+        define_method(relationship_name.to_sym) { fetch_relationship(relationship_name) }
+      end
+
+      def kind_of_resource?(klass)
+        !klass.nil? && klass < Resource
+      end
+
+      private
+
+      def rel_options_process!(relationship_name, **options)
+        embed_klass = options.delete(:embed_with)
+        return if embed_klass.nil?
+
+        embed_klass = embed_klass.is_a?(String) ? Kernel.const_get(embed_klass) : embed_klass
+        if kind_of_resource?(embed_klass)
+          rel_options[relationship_name.to_s] = { embed_with: embed_klass }
+        else
+          raise InvalidEmbedKlass
+        end
+      rescue NameError # Rescue from `Kernel.const_get/1`
+        raise InvalidEmbedKlass
+      end
 
       module ClassMethods
         def initialize(*args)
@@ -66,29 +92,45 @@ module JsonAPIObjectMapper
         end
 
         def assign_attribute(key, value)
-          block = self.class.attr_blocks[key.to_s] || DEFAULT_BLOCK
+          block = self.class.attr_blocks.fetch(key.to_s, DEFAULT_BLOCK)
           @_class_attributes[key.to_s] = block.call(value)
         end
 
-        def assign_relationship(key, value)
-          block             = self.class.rel_blocks[key.to_s] || DEFAULT_BLOCK
-          rel_embed_class   = self.class.rel_options[key.to_s]
-          rel_value         = @includes.fetch(value)
+        def assign_has_one_relationship(key, value)
+          key                        = key.to_s
+          block                      = self.class.rel_has_one_blocks.fetch(key, DEFAULT_BLOCK)
+          rel_embed_class            = self.class.rel_options.dig(key, :embed_with)
+          rel_value                  = embed!(rel_embed_class, @includes.fetch(value))
+          @_class_relationships[key] = block.call(rel_value)
+        end
 
-          @_class_relationships[key.to_s] =
-            if rel_value != value && rel_embed_class.respond_to?(:embed!)
-              block.call(rel_embed_class.embed!(rel_value))
-            else
-              block.call(rel_value)
-            end
+        def assign_has_many_relationship(key, values)
+          key                        = key.to_s
+          block                      = self.class.rel_has_many_blocks.fetch(key, HAS_MANY_BLOCK)
+          rel_embed_class            = self.class.rel_options.dig(key, :embed_with)
+          rel_values                 = values.map { |value| @includes.fetch(value) }
+          @_class_relationships[key] = block.call(embed!(rel_embed_class, rel_values))
         end
 
         def include_attribute?(attribute_name)
           self.class.attr_blocks.key?(attribute_name)
         end
 
-        def include_relationship?(rel_name)
-          self.class.rel_blocks.key?(rel_name)
+        def include_has_one_relationship?(rel_name)
+          self.class.rel_has_one_blocks.key?(rel_name)
+        end
+
+        def include_has_many_relationship?(rel_name)
+          self.class.rel_has_many_blocks.key?(rel_name)
+        end
+
+        def kind_of_resource?(rel_embed_class)
+          self.class.kind_of_resource?(rel_embed_class)
+        end
+
+        def embed!(rel_embed_class, attributes)
+          return attributes unless self.class.kind_of_resource?(rel_embed_class)
+          rel_embed_class.load("data" => attributes)
         end
       end
     end
