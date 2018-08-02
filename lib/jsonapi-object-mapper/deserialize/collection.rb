@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "jsonapi-object-mapper/parser/errors"
-extend Forwardable
 
 module JsonAPIObjectMapper
   module Deserialize
