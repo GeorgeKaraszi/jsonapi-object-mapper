@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/GeorgeKaraszi/jsonapi-object-mapper"
   spec.license       = "MIT"
 
-  spec.files         = Dir["README.md", "lib/**/*"]
+  spec.files         = Dir["README.md", "CHANGELOG.md", "lib/**/*"]
   spec.test_files    = `git ls-files -- spec/*`.split("\n")
   spec.require_paths = ["lib"]
 
