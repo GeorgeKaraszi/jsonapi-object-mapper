@@ -82,6 +82,34 @@ user.errors  #=> [<# OpenStruct title:..., detail: ..., source: {...}, ...>, ...
 
 ```
 
+### Links
+
+When links contain pagination results:
+```ruby
+user = User.call(json_payload)
+user.links             #=> <# OpenStruct total_pages: 10, next: "https://random-api.com/search?name=me&page=2", ... #>
+user.links.total_pages #=> 10
+user.links.next        #=> "https://random-api.com/search?name=me&page=2"
+```
+
+
+If no links come back from a response
+```ruby
+User.call(json_payload).links #=> nil
+```
+
+#### Potential Gotchas:
+
+Since the ruby language doesn't necessary allow for you to call methods with hyphens in them. Link method names are always converted to underscore's.
+
+example: 
+```ruby
+payload = { "links" => { "total-pages" => 10, ... }, ... }
+user = User.call(payload)
+
+user.links.total_pages #=> 10
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
