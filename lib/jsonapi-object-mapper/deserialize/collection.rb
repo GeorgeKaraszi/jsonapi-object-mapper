@@ -11,7 +11,7 @@ module JsonAPIObjectMapper
 
       attr_reader :collection_data, :links
 
-      def_delegators :@collection_data, :first, :last, :[], :each
+      def_delegators :@collection_data, :first, :last, :[]
 
       def initialize(parser, klass:)
         raise InvalidResource unless klass.is_a?(Class)
