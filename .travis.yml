@@ -8,4 +8,8 @@ rvm:
 cache:
   bundler: true
 
+branches:
+  only:
+  - master
+
 before_install: gem install bundler -v 1.16.2

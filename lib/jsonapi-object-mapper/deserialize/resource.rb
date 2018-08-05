@@ -10,6 +10,8 @@ module JsonAPIObjectMapper
       include JsonAPIObjectMapper::Parser::Errors
       extend DSL
 
+      attr_reader :links
+
       class << self
         attr_accessor :rel_has_one_blocks, :rel_has_many_blocks, :rel_options, :attr_blocks, :id_block, :type_block
       end
@@ -34,7 +36,7 @@ module JsonAPIObjectMapper
 
       def self.load(document)
         parser = JsonAPIObjectMapper::Parser::Document.new(document)
-        if parser.document["data"].is_a?(Array) || parser.invalid?
+        if parser.contains_data_array? || parser.invalid?
           Collection.new(parser, klass: self)
         else
           new(parser)
@@ -48,6 +50,7 @@ module JsonAPIObjectMapper
 
         if document_valid?
           @includes      = parser.includes
+          @links         = parser_links(parser)
           @data          = document_data(parser, document)
           @id            = @data["id"]
           @type          = @data["type"]
@@ -66,7 +69,11 @@ module JsonAPIObjectMapper
       private
 
       def document_data(parser, document)
-        document.nil? ? (parser.document["data"] || parser.document) : (document["data"] || document)
+        document.nil? ? parser.document_data : (document["data"] || document)
+      end
+
+      def parser_links(parser)
+        parser.links unless parser.contains_data_array?
       end
 
       def deserialize!

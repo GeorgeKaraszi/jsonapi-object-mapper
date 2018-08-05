@@ -79,6 +79,25 @@ module JsonAPIObjectMapper
             expect(result.source).to include("pointer" => "name")
           end
         end
+
+        context "Links" do
+          let(:foo_bar_klass) { Class.new(JsonAPIObjectMapper::Deserialize::Resource) }
+          subject { described_class.new(parser, klass: foo_bar_klass).links }
+
+          context "Results do not include links" do
+            it { is_expected.to be_nil }
+          end
+
+          it_behaves_like "it contains links" do
+            let!(:payload) { payload_links.merge("data" => [{ "id" => "1", "type" => "foobar" }]) }
+
+            it "Should not include links in the children of data resources" do
+              results = described_class.new(parser, klass: foo_bar_klass)
+              expect(results.first.id).to eq("1")
+              expect(results.first.links).to be_nil
+            end
+          end
+        end
       end
     end
   end

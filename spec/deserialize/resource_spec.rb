@@ -191,6 +191,18 @@ module JsonAPIObjectMapper
           end
         end
       end
+
+      describe "Links" do
+        let(:foo_bar_klass) { Class.new(described_class) }
+        subject { foo_bar_klass.load(payload).links }
+
+        it_behaves_like "it contains links"
+
+        context "Response does not contain links" do
+          let(:payload) { {} }
+          it { is_expected.to be_nil }
+        end
+      end
     end
   end
 end

@@ -77,9 +77,13 @@ module JsonAPIObjectMapper
         end
         alias to_h to_hash
 
-        def to_s
-          to_hash.to_s
+        def inspect
+          "#<#{self.class}:0x#{object_id.to_s(16)}, "\
+          "@errors = #{@errors.inspect}, "\
+          "attributes = #{@_class_attributes.inspect}, "\
+          "relationships = #{@_class_relationships.inspect}>"
         end
+        alias to_s inspect
 
         protected
 

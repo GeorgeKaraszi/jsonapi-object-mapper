@@ -9,7 +9,7 @@ module JsonAPIObjectMapper
       include Enumerable
       include JsonAPIObjectMapper::Parser::Errors
 
-      attr_accessor :collection_data
+      attr_reader :collection_data, :links
 
       def_delegators :@collection_data, :first, :last, :[]
 
@@ -17,11 +17,12 @@ module JsonAPIObjectMapper
         raise InvalidResource unless klass.is_a?(Class)
         raise InvalidParser   unless parser.is_a?(JsonAPIObjectMapper::Parser::Document)
         @errors            = parser.errors
+        @links             = parser.links
         @collection_data   =
           if document_invalid?
             []
           else
-            Array(parser.document["data"]).map do |doc|
+            Array(parser.document_data).map do |doc|
               klass.new(parser, document: doc)
             end
           end.freeze
@@ -29,15 +30,28 @@ module JsonAPIObjectMapper
         freeze
       end
 
-      def to_hash
-        @collection_data.map(&:to_hash)
-      end
-
       def each
         @collection_data.each do |data|
           yield data
         end
       end
+
+      def inspect
+        "#<#{self.class}:0x#{object_id.to_s(16)}, "\
+        "@errors=#{@errors.inspect}, "\
+        "@links=#{@links.inspect}, "\
+        "@data=#{@collection_data.map(&:inspect)}>"\
+      end
+      alias to_s inspect
+
+      def to_hash
+        {}.tap do |hash|
+          hash[:data]   = @collection_data.map(&:to_hash)
+          hash[:links]  = @links.to_h unless @links.nil?
+          hash[:errors] = @errors unless valid?
+        end
+      end
+      alias to_h to_hash
     end
   end
 end
