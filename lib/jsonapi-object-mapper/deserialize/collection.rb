@@ -36,6 +36,14 @@ module JsonAPIObjectMapper
         end
       end
 
+      def inspect
+        "#<#{self.class}:0x#{object_id.to_s(16)}, "\
+        "@errors=#{@errors.inspect}, "\
+        "@links=#{@links.inspect}, "\
+        "@data=#{@collection_data.map(&:inspect)}>"\
+      end
+      alias to_s inspect
+
       def to_hash
         {}.tap do |hash|
           hash[:data]   = @collection_data.map(&:to_hash)
